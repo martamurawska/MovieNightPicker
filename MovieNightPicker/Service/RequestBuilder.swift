@@ -24,7 +24,7 @@ struct RequestBuilder {
 
     /// Discover movies endpoint
     /// genreIds and watchProvider parameter in case user applies filters
-    static func discoverMovies(page: Int = 1, genreIds: [Int]? = nil, watchProvider: Int? = nil) -> URLRequest? {
+    static func discoverMovies(page: Int, genreIds: [Int]?, watchProvider: Int?, language: String?) -> URLRequest? {
         var queryItems = [
             URLQueryItem(name: "include_adult", value: "false"),
             URLQueryItem(name: "include_video", value: "false"),
@@ -39,11 +39,17 @@ struct RequestBuilder {
         }
         
         // add platform filter
+        // could be relevant for amazon prime with_watch_monetization_types: [flatrate, free, ads]
         if let watchProvider {
             queryItems.append(URLQueryItem(name: "with_watch_providers", value: "\(watchProvider)"))
             queryItems.append(URLQueryItem(name: "watch_region", value: Locale.current.region?.identifier))
         }
         
+        // add language filter
+        if let language {
+            queryItems.append(URLQueryItem(name: "with_original_language", value: language))
+        }
+
         return makeRequest(path: "/discover/movie", queryItems: queryItems)
     }
     

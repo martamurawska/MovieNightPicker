@@ -3,7 +3,6 @@ import SwiftUI
 struct RandomMovieView: View {
     @ObservedObject var vm: DiscoverViewModel
     var body: some View {
-        
         if let movie = vm.randomMovie, !vm.isLoading {
             VStack(spacing: 16) {
                 DiscoverCardView(movie: movie)
@@ -20,6 +19,10 @@ struct RandomMovieView: View {
             }.padding()
         } else if vm.isLoading {
             LoadingMovieView()
+        } else if let errorMessage = vm.errorMessage {
+            Text(errorMessage)
+                .font(.title2)
+                .foregroundStyle(Color.appPrimary)
         }
     }
     

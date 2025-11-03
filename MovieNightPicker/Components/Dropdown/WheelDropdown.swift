@@ -44,7 +44,7 @@ struct WheelSelector<Item: SelectableItem>: View {
             .padding()
 
             Picker(title, selection: $selection) {
-                Text("All \(title.lowercased())").tag(Optional<Item>.none)
+                Text("All").tag(Optional<Item>.none)
                 ForEach(items) { item in
                     Text(item.name).tag(Optional(item))
                 }

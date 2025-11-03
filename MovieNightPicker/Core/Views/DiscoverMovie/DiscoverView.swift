@@ -43,6 +43,7 @@ struct DiscoverView: View {
             VStack(spacing: 24) {
                 WheelSelector(selection: $vm.selectedGenre, items: GenreStore.shared.genres, title: "Genre")
                 WheelSelector(selection: $vm.selectedPlatform, items: allPlatforms, title: "Streaming platform")
+                WheelSelector(selection: $vm.selectedLanguage, items: allLanguages, title: "Origin language")
                 button
             }
             .padding(32)

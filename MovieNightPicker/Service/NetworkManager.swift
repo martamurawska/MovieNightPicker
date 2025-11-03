@@ -19,4 +19,12 @@ enum NetworkError: Error {
     case badRequest
     case emptyData
     case decodingFailed
+    
+    var description: String {
+        switch self {
+        case .badRequest: return "There was network error"
+        case .decodingFailed: return "Decoding Failed"
+        case .emptyData: return "No movie found for given filters"
+        }
+    }
 }

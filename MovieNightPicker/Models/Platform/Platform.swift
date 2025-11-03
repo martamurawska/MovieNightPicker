@@ -12,7 +12,7 @@ import Foundation
 //"provider_name": "Joyn",
 //"provider_id": 304
 
-struct Platform: Identifiable, Hashable, SelectableItem {
+struct Platform: SelectableItem {
     let id: Int
     let name: String
 }

@@ -6,7 +6,10 @@ class DiscoverViewModel: ObservableObject {
     /// in case user personalize generation
     @Published var selectedGenre: Genre?
     @Published var selectedPlatform: Platform?
+    @Published var selectedLanguage: Language?
+    
     @Published var isLoading: Bool = false
+    @Published var errorMessage: String?
     
     let moviesDataService = MoviesDataService()
     private let watchlistService = WatchlistService.shared
@@ -34,12 +37,13 @@ class DiscoverViewModel: ObservableObject {
     }
     
     func getRandomMovie() async {
-        let randomNumber = Int.random(in: 1...1000)
-        // one page has 20 results
-        let randomPage = randomNumber/20
-        let randomMovieIndex = randomNumber % 20
-        
         do {
+            let totalResults = try await getTotalResults()
+            let randomNumber = Int.random(in: 1...totalResults)
+            // one page has 20 results
+            let randomPage = randomNumber/20
+            let randomMovieIndex = randomNumber % 20
+            
             let response = try await moviesDataService.loadMovies(page: randomPage, genreIds: selectedGenre.map { [$0.id] } ?? nil, watchProvider: selectedPlatform?.id ?? nil)
             let movie = response.results[randomMovieIndex]
             let genreNames = movie.mappedGenres
@@ -52,9 +56,25 @@ class DiscoverViewModel: ObservableObject {
                 self.isLoading = false
             }
         } catch {
-            print("Error fetching \(error)")
+            await MainActor.run {
+                self.isLoading = false
+                self.errorMessage = (error as? NetworkError)?.description
+            }
         }
-        
+    }
+    
+    func getTotalResults() async throws -> Int {
+        do {
+            let initialResponse = try await moviesDataService.loadMovies(genreIds: selectedGenre.map { [$0.id] } ?? nil, watchProvider: selectedPlatform?.id ?? nil, language: selectedLanguage?.id ?? nil)
+            
+            guard initialResponse.totalResults > 0 else { throw NetworkError.emptyData }
+            
+            // 1000 is a limit because TMDB doesn't provide any way to go past page 500 right now
+            let totalResults = initialResponse.totalResults > 1000 ? 1000 : initialResponse.totalResults
+            return totalResults
+        } catch {
+            throw error
+        }
     }
     
     func toggleGenre(_ genre: Genre) {
@@ -70,6 +90,14 @@ class DiscoverViewModel: ObservableObject {
             selectedPlatform = nil
         } else {
             selectedPlatform = platform
+        }
+    }
+    
+    func toggleLanguage(_ language: Language) {
+        if selectedLanguage?.id == language.id {
+            selectedLanguage = nil
+        } else {
+            selectedLanguage = language
         }
     }
     
