@@ -3,6 +3,7 @@ import SwiftUI
 struct BrowseMovieView: View {
     @ObservedObject private var vm: BrowseMoviesViewModel
     @State var showTags: Bool = false
+    @State var showSearchBar: Bool = false
     
     let columns = [
         GridItem(.flexible(), alignment: .top),
@@ -16,11 +17,15 @@ struct BrowseMovieView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             titleAndFilterBar
+            if showSearchBar {
+                SearchBarView(searchText: $vm.searchText)
+            }
             Spacer(minLength: 16)
             if showTags {
                 filterSection
             }
             movieCards
+                .padding(.bottom, 72)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .navigationDestination(for: Movie.self) { movie in
@@ -28,9 +33,11 @@ struct BrowseMovieView: View {
         }
         .padding()
         .edgesIgnoringSafeArea(.bottom)
-        //        .onChange(of: vm.searchText) {
-        //            vm.onSearchQueryChange()
-        //        }
+        .onChange(of: vm.searchText) {
+            vm.onSearchQueryChange()
+        }
+        .animation(.easeInOut, value: showTags)
+        .animation(.easeInOut, value: showSearchBar)
     }
     
     var titleAndFilterBar: some View {
@@ -40,7 +47,18 @@ struct BrowseMovieView: View {
                 .bold()
             Spacer()
             Button {
+                showSearchBar.toggle()
+                showTags = false
+            } label: {
+                Image(systemName: "magnifyingglass")
+                    .frame(width: 36, height: 36)
+            }
+            .buttonStyle(.plain)
+            .padding(4)
+            
+            Button {
                 showTags.toggle()
+                showSearchBar = false
             } label: {
                 Image(systemName: "slider.horizontal.3")
                     .frame(width: 36, height: 36)
@@ -67,7 +85,7 @@ struct BrowseMovieView: View {
     
     var clearAllButton: some View {
         Button {
-            vm.clearAllFilter()
+            vm.clearAllFilters()
         } label: {
             Text("Clear all")
         }
@@ -95,7 +113,7 @@ struct BrowseMovieView: View {
                 .buttonStyle(.plain)
                 .padding(4)
                 .onAppear {
-                    vm.shouldLoadPagination(id: movie.id)
+                    vm.shouldLoadMore(id: movie.id)
                 }
             }
         }

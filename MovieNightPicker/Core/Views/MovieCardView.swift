@@ -26,7 +26,7 @@ struct MovieCardView: View {
         }
         .background(Color.surfaceBackground)
         .cornerRadius(20)
-        .shadow(color: .appPrimary.opacity(0.15), radius: 10, x: 0, y: 0)
+        .shadow(color: .appPrimary.opacity(0.2), radius: 5, x: 0, y: 0)
     }
 }
 
